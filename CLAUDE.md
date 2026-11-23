@@ -80,6 +80,8 @@ Cahier des charges complet et conception : `docs/CONCEPTION.md` (lots du MVP en 
   page a un en-tête `.entete-page` (titre + phrase d'explication). Page de présentation publique à `/`
   (`accounts/accueil.html`, `base_public.html`, en-tête avec « Se connecter » / « Essai gratuit ») ; aucun
   faux témoignage ni chiffre inventé. 108 tests.
+- Dépôt Git (23/11/2026) : dépôt PRIVÉ https://github.com/arandapaul71-svg/AvisPilote (branche `main`).
+  `.gitignore` racine : jamais de `.env`, `*.db`, `*.sqlite3`, `.venv/`, `.claude/`.
 - Prochains lots possibles : multi-établissements, déploiement en ligne (HTTPS, PostgreSQL, tâches planifiées).
 - Nouvelle grille (v2, `v2/billing/plans.py`) : Starter 9,99 € / 50 avis, Pro 19,99 € / 200, Business 39,99 € / 600.
   Une alerte simple est incluse dès Starter (le différenciateur doit être visible).
