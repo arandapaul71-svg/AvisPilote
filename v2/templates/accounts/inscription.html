@@ -1,0 +1,16 @@
+{% extends "base_public.html" %}
+{% block titre %}Créer un compte · AvisPilote{% endblock %}
+{% block contenu %}
+<div class="auth-page">
+  <section class="carte auth-carte">
+    <h1>Essai gratuit de 14 jours</h1>
+    <p class="sous-titre">Sans carte bancaire. Tu connecteras ensuite ta fiche Google via l'écran officiel de Google : nous ne te demanderons jamais ton mot de passe Google.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "accounts/_champs.html" %}
+      <button class="bouton" type="submit">Créer mon compte</button>
+    </form>
+    <p class="bas">Déjà inscrit ? <a href="{% url 'accounts:connexion' %}">Se connecter</a></p>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block titre %}Outils{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>QR code et simulateur</h1>
+  <p>Un QR code pour récolter plus d'avis, et un calcul pour savoir combien il en faut pour améliorer ta note.</p>
+</header>
+
+<div class="grille-graphes">
+  <section class="carte">
+    <h2>QR code pour collecter des avis</h2>
+    <p class="discret">À imprimer sur les tables, le comptoir, les emballages ou les factures. Il ouvre directement la page Google où le client laisse son avis.</p>
+    {% if qr %}
+      {# SVG produit par la bibliothèque segno à partir d'un lien Google validé : aucun texte saisi par l'utilisateur. #}
+      <div class="qr">{{ qr|safe }}</div>
+      <div class="actions">
+        <a class="bouton" href="{% url 'insights:qr_affiche' %}" target="_blank" rel="noopener">Affiche à imprimer</a>
+        <a class="bouton secondaire" href="{% url 'insights:qr_telecharger' 'png' %}">Télécharger PNG</a>
+        <a class="bouton secondaire" href="{% url 'insights:qr_telecharger' 'svg' %}">SVG (imprimeur)</a>
+      </div>
+    {% else %}
+      <p class="bandeau info">{% if fiche.is_demo %}La fiche de démonstration n'a pas de vrai lien Google.{% else %}Google n'a pas fourni de lien d'avis pour cette fiche.{% endif %} Colle le lien « Demander des avis » de ta fiche Google (dans Google Business Profile → Demander des avis) pour créer ton QR code.</p>
+    {% endif %}
+    {% if peut_modifier_lien %}
+    <details {% if not qr or form_lien.errors %}open{% endif %}>
+      <summary>{% if qr %}Changer le lien{% else %}Ajouter le lien{% endif %}</summary>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "accounts/_champs.html" with form=form_lien %}
+        <button class="bouton" type="submit">Enregistrer</button>
+      </form>
+    </details>
+    {% endif %}
+    <p class="note-regles">À respecter (règles Google) : propose le QR code à <strong>tous</strong> tes clients, sans leur demander seulement un avis positif et sans contrepartie (réduction, cadeau). Sinon Google peut supprimer des avis ou suspendre ta fiche.</p>
+  </section>
+
+  <section class="carte">
+    <h2>Simulateur de note</h2>
+    {% with s=sim.situation %}
+    {% if not s.nombre %}
+      <p class="discret">Pas encore d'avis : le simulateur aura besoin de ta note actuelle.</p>
+    {% else %}
+      <p>Aujourd'hui : <strong>{{ s.affichee|floatformat:1 }} ★</strong> avec <strong>{{ s.nombre }} avis</strong>
+        <span class="discret">({% if s.source == "google" %}chiffres Google{% else %}calculé sur les avis récupérés{% endif %}{% if fiche.is_demo %}, démo{% endif %})</span></p>
+
+      <form class="filtres" method="get">
+        <label>Note visée <input type="number" name="cible" min="1" max="5" step="0.1" value="{{ sim.objectif.cible|unlocalize|default:'' }}"></label>
+        <button class="bouton secondaire" type="submit">Calculer</button>
+      </form>
+      {% if sim.objectif %}
+        <div class="resultat">
+        {% if sim.objectif.necessaires is None %}
+          <p class="discret">Cette note n'est pas atteignable.</p>
+        {% elif sim.objectif.necessaires == 0 %}
+          <p>✓ Ta note affichée atteint déjà {{ sim.objectif.cible|floatformat:1 }} ★.</p>
+        {% else %}
+          <p class="grand">Il te faudrait environ <strong>{{ sim.objectif.necessaires }} avis 5 ★</strong> de plus (sans aucun avis moins bon) pour afficher {{ sim.objectif.cible|floatformat:1 }} ★.</p>
+          {% if sim.objectif.mois %}<p class="discret">Au rythme actuel ({{ s.cinq_par_mois|floatformat:1 }} avis 5 ★ par mois), cela prendrait environ {{ sim.objectif.mois }} mois.</p>{% endif %}
+        {% endif %}
+        </div>
+      {% endif %}
+
+      <form class="filtres" method="get">
+        <label>Si je reçois <input type="number" name="ajout" min="1" max="10000" value="{{ sim.scenario.ajout|default:10 }}"></label>
+        <label>avis à <select name="etoiles">{% for n in "54321" %}<option value="{{ n }}" {% if sim.scenario.etoiles|stringformat:"d" == n %}selected{% endif %}>{{ n }} ★</option>{% endfor %}</select></label>
+        <button class="bouton secondaire" type="submit">Simuler</button>
+      </form>
+      {% if sim.scenario %}
+        <p class="resultat">Ta note passerait à <strong>{{ sim.scenario.affichee|floatformat:1 }} ★</strong> <span class="discret">(moyenne exacte {{ sim.scenario.note|floatformat:2 }})</span>.</p>
+      {% endif %}
+
+      {% if sim.solidite %}<p class="discret">Repère : {{ sim.solidite }} avis 1 ★ d'affilée suffiraient à faire baisser ta note affichée de 0,1. D'où l'intérêt de répondre vite aux mécontents.</p>{% endif %}
+      <p class="note-regles">Estimation : Google arrondit la note et peut filtrer certains avis, le résultat réel peut différer légèrement.</p>
+    {% endif %}
+    {% endwith %}
+  </section>
+</div>
+{% endblock %}

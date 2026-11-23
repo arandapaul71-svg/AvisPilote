@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titre %}{{ titre_page }}{% endblock %}
+{% block contenu %}
+<article class="carte legal">
+  <p class="bandeau alerte">Modèle à compléter et à faire relire avant tout lancement commercial (éléments entre [crochets]).</p>
+  <h1>{{ titre_page }}</h1>
+  <p class="discret">Dernière mise à jour : [date]</p>
+  {% block texte %}{% endblock %}
+</article>
+{% endblock %}

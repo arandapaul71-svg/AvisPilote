@@ -1,0 +1,166 @@
+{% extends "base_public.html" %}
+{% block titre %}AvisPilote · Vos avis Google, compris et répondus{% endblock %}
+{% block contenu %}
+<div class="lp">
+
+  <section class="lp-section lp-hero">
+    <span class="lp-badge"><b>★</b> Pour les boulangeries, restaurants, fleuristes, salons…</span>
+    <h1>Vos avis Google, compris et répondus.</h1>
+    <p class="accroche">AvisPilote répond à vos clients dans votre ton, vous montre ce qu'ils aiment et ce qui les agace, et vous prévient quand un problème revient, avant qu'il ne fasse baisser votre note.</p>
+    <div class="lp-cta">
+      <a class="bouton grand" href="{% url 'accounts:inscription' %}">Commencer l'essai gratuit</a>
+      {% if demo_autorisee %}
+      <form method="post" action="{% url 'accounts:demo_express' %}">{% csrf_token %}<button class="bouton secondaire grand" type="submit">Voir la démo</button></form>
+      {% endif %}
+    </div>
+    <p class="lp-rassurance">14 jours gratuits · sans carte bancaire · sans engagement</p>
+
+    <div class="lp-apercu" aria-hidden="true">
+      <div class="lp-apercu-barre"><i></i><i></i><i></i></div>
+      <div class="lp-apercu-corps">
+        <div class="lp-apercu-cote">
+          <span class="actif">Tableau de bord</span><span>Avis</span><span>Alertes</span><span>Analyses</span><span>Rapports</span><span>Assistant IA</span>
+        </div>
+        <div class="lp-apercu-main">
+          <div class="lp-mini-tuiles">
+            <div>Note Google<b>4,6 ★</b></div>
+            <div>Avis ce mois-ci<b>38</b></div>
+            <div>Taux de réponse<b>97 %</b></div>
+          </div>
+          <div class="lp-mini-alerte"><strong>⚠ Plainte qui revient</strong> · 4 clients parlent de l'attente cette semaine, contre 1 habituellement.</div>
+          <div class="lp-mini-barres"><i class="h2"></i><i class="h3"></i><i class="h2"></i><i class="h4"></i><i class="h3"></i><i class="n h2"></i><i class="h5"></i><i class="h3"></i><i class="h4"></i><i class="h2"></i><i class="h3"></i><i class="h5"></i></div>
+          <div class="lp-mini-avis">
+            <span class="etoiles">★★★★★</span> <strong>Léa M.</strong> · « Les croissants sont un régal et l'accueil toujours souriant ! »
+            <div class="reponse">Merci beaucoup Léa ! Toute l'équipe est ravie que nos croissants et notre accueil vous plaisent. À très vite au fournil !</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="fonctions">
+    <div class="lp-titre-section">
+      <p class="surtitre">Ce que fait AvisPilote</p>
+      <h2>Moins de temps sur les avis, plus d'idées pour votre commerce.</h2>
+      <p>Chaque avis reçoit une réponse soignée, et chaque commentaire devient une information utile.</p>
+    </div>
+    <div class="lp-grille">
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></div>
+        <h3>Des réponses dans votre ton</h3>
+        <p>Chaleureux, professionnel ou décontracté, avec ou sans tutoiement. Les avis positifs peuvent partir tout seuls ; les négatifs attendent votre validation.</p>
+      </article>
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+        <h3>Des garde-fous</h3>
+        <p>Jamais de promesse de remboursement, d'aveu de faute ou d'invention. Les avis sensibles (hygiène, menace juridique…) restent toujours entre vos mains.</p>
+      </article>
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></div>
+        <h3>Ce que pensent vos clients</h3>
+        <p>Qualités et défauts relevés automatiquement : accueil, qualité, prix, attente, propreté… avec les avis qui le prouvent.</p>
+      </article>
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+        <h3>Un tableau de bord clair</h3>
+        <p>Note, nombre d'avis, taux de réponse et jours inhabituels : un événement qui a plu, ou un rush qui a mal tourné.</p>
+      </article>
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></div>
+        <h3>Un rapport chaque mois</h3>
+        <p>Un bilan clair par e-mail et en PDF : évolution, points forts, problèmes et recommandations.</p>
+      </article>
+      <article class="lp-fonction">
+        <div class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM17 20h4v-3"/></svg></div>
+        <h3>Plus d'avis, simplement</h3>
+        <p>Un QR code à poser sur le comptoir, et un simulateur pour savoir combien d'avis il faut pour gagner 0,1 ★.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="lp-section" id="prevention">
+    <div class="lp-phare">
+      <div>
+        <h2>Repérer un problème avant qu'il ne devienne une crise.</h2>
+        <p class="discret">Trois clients qui parlent de croissants moins bons, ce n'est pas encore une mauvaise note. Mais c'est le bon moment pour agir.</p>
+        <ol>
+          <li>AvisPilote compare chaque semaine vos avis à votre habitude.</li>
+          <li>Il vous alerte quand une plainte revient, avec les avis concernés.</li>
+          <li>Il propose des actions concrètes, puis suit l'effet de vos changements.</li>
+        </ol>
+      </div>
+      <div class="lp-apercu" aria-hidden="true">
+        <div class="lp-apercu-main">
+          <div class="lp-mini-alerte"><strong>⚠ Qualité irrégulière</strong> · 5 avis en 30 jours, en hausse (1 le mois d'avant).</div>
+          <div class="lp-mini-avis">Actions proposées :<br>– Vérifier les temps de cuisson des fournées concernées<br>– Ajuster les quantités pour ne pas vendre la veille</div>
+          <div class="lp-mini-alerte niveau-positif">✓ Suivi : depuis le 12 nov., 1 avis mentionne encore le problème, contre 5 avant.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-titre-section">
+      <p class="surtitre">En trois étapes</p>
+      <h2>Prêt en cinq minutes.</h2>
+    </div>
+    <div class="lp-etapes">
+      <div class="lp-etape"><h3>Créez votre compte</h3><p>Nom de l'établissement et secteur. Pas de carte bancaire pendant l'essai.</p></div>
+      <div class="lp-etape"><h3>Connectez votre fiche Google</h3><p>Via l'écran officiel de Google : nous ne voyons jamais votre mot de passe.</p></div>
+      <div class="lp-etape"><h3>Réglez votre assistant</h3><p>Ton, longueur, expressions à éviter… puis laissez-le travailler.</p></div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="tarifs">
+    <div class="lp-titre-section">
+      <p class="surtitre">Tarifs</p>
+      <h2>Simple, sans engagement.</h2>
+      <p>Prix hors taxes, par mois. Changez de formule ou arrêtez quand vous voulez.</p>
+    </div>
+    <div class="lp-prix">
+      {% for f in formules %}
+      <article class="lp-formule{% if f.cle == 'pro' %} mise-en-avant{% endif %}">
+        <h3>{{ f.nom }}{% if f.cle == 'pro' %} <span class="etiquette">Recommandé</span>{% endif %}</h3>
+        <p class="prix">{{ f.prix }} <span>/ mois</span></p>
+        <ul>
+          <li>{{ f.quota }} avis traités par mois</li>
+          <li>{{ f.etablissements }} établissement{{ f.etablissements|pluralize }}</li>
+          <li>Réponses IA et tableau de bord</li>
+          {% if "recommandations" in f.fonctions %}<li>Alertes détaillées et recommandations suivies</li><li>Rapports PDF et e-mail</li>{% else %}<li>Alertes simples</li>{% endif %}
+        </ul>
+        <a class="bouton{% if f.cle != 'pro' %} secondaire{% endif %}" href="{% url 'accounts:inscription' %}">Essayer 14 jours</a>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="lp-section" id="questions">
+    <div class="lp-titre-section"><p class="surtitre">Questions</p><h2>Vous vous demandez…</h2></div>
+    <div class="lp-faq">
+      <details><summary>Est-ce que l'IA peut publier n'importe quoi en mon nom ?</summary>
+        <p>Non. Vous choisissez, note par note, si les réponses partent seules ou attendent votre validation. Chaque réponse est contrôlée avant publication (pas de promesse, pas d'aveu, pas de répétition), et les avis sensibles sont toujours validés par vous.</p></details>
+      <details><summary>Faut-il donner mon mot de passe Google ?</summary>
+        <p>Jamais. La connexion passe par l'écran officiel de Google, et vous pouvez retirer l'accès à tout moment.</p></details>
+      <details><summary>Que se passe-t-il si je reçois plus d'avis que prévu ?</summary>
+        <p>Les avis restent visibles dans AvisPilote, ils ne sont simplement plus traités par l'assistant jusqu'au mois suivant. Une partie du quota est toujours gardée pour les avis négatifs.</p></details>
+      <details><summary>Le QR code est-il autorisé par Google ?</summary>
+        <p>Oui, tant que la demande reste neutre : le même QR code pour tous les clients, sans cadeau en échange. C'est ce que propose AvisPilote.</p></details>
+      <details><summary>Comment arrêter ?</summary>
+        <p>En un clic depuis la page Abonnement. La suppression du compte efface toutes vos données.</p></details>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-final">
+      <h2>Vos clients vous parlent. Écoutez-les sans y passer vos soirées.</h2>
+      <p>14 jours gratuits, sans carte bancaire.</p>
+      <div class="lp-cta">
+        <a class="bouton grand" href="{% url 'accounts:inscription' %}">Commencer l'essai gratuit</a>
+        {% if demo_autorisee %}
+        <form method="post" action="{% url 'accounts:demo_express' %}">{% csrf_token %}<button class="bouton secondaire grand" type="submit">Voir la démo</button></form>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

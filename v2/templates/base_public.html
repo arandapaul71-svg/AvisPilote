@@ -1,0 +1,19 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}AvisPilote{% endblock %}</title>
+  <meta name="description" content="AvisPilote répond aux avis Google de votre commerce et vous alerte quand un problème revient, avant qu'il n'abîme votre note.">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  <link rel="icon" href="{% static 'icone.svg' %}" type="image/svg+xml">
+  <meta name="theme-color" content="#f7f7f5">
+</head>
+<body>
+{% include "_entete_public.html" %}
+{% for m in messages %}<p class="message {{ m.tags }} page-publique">{{ m }}</p>{% endfor %}
+{% block contenu %}{% endblock %}
+{% include "_pied_public.html" %}
+</body>
+</html>

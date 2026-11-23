@@ -1,0 +1,14 @@
+# Secrets et données locales : ne jamais les envoyer sur Git
+.env
+*.db
+*.sqlite3
+v2/.env
+
+# Environnements Python et fichiers générés
+.venv/
+__pycache__/
+*.pyc
+v2/staticfiles/
+
+# Réglages locaux des outils
+.claude/

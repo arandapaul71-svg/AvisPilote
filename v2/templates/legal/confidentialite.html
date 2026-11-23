@@ -1,0 +1,26 @@
+{% extends "legal/_base_legal.html" %}
+{% block texte %}
+<h2>Responsable du traitement</h2>
+<p>[Nom Prénom / raison sociale], [adresse], [e-mail de contact].</p>
+
+<h2>Données traitées et pourquoi</h2>
+<ul>
+  <li><strong>Compte</strong> : e-mail, mot de passe (stocké haché, jamais en clair), nom et secteur de l'établissement — pour fournir le service.</li>
+  <li><strong>Avis Google</strong> de l'établissement connecté (prénom affiché de l'auteur, note, texte, date) — pour les analyser et y répondre, à la demande du professionnel (sous-traitance, art. 28 RGPD).</li>
+  <li><strong>Accès Google</strong> : jetons d'autorisation, stockés chiffrés.</li>
+  <li><strong>Paiement</strong> : géré par Stripe ; nous ne conservons que les identifiants client et abonnement.</li>
+  <li><strong>Journal de sécurité</strong> : actions importantes et adresse IP, pour protéger les comptes.</li>
+</ul>
+
+<h2>Sous-traitants</h2>
+<p>Google (API Business Profile), Stripe (paiement), Anthropic (rédaction et analyse des réponses, si activée), [hébergeur], [service d'e-mails]. Certains peuvent traiter des données hors de l'Union européenne, avec les garanties prévues par le RGPD (clauses contractuelles types).</p>
+
+<h2>Durée de conservation</h2>
+<p>Les données sont conservées tant que le compte est actif, puis supprimées lors de la suppression du compte (le journal de sécurité, anonymisé, est conservé [12] mois). La déconnexion de Google supprime les avis récupérés.</p>
+
+<h2>Tes droits</h2>
+<p>Accès, rectification, effacement (bouton « Supprimer mon compte »), opposition, limitation et portabilité : écris à [e-mail]. Tu peux aussi saisir la CNIL (cnil.fr).</p>
+
+<h2>Cookies</h2>
+<p>Seuls des cookies strictement nécessaires sont utilisés (session de connexion, protection contre la falsification de formulaires). Aucun cookie publicitaire ni de mesure d'audience.</p>
+{% endblock %}

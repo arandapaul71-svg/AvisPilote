@@ -1,0 +1,8 @@
+{% if form.non_field_errors %}<div class="erreur">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+{% for champ in form %}
+  <div class="champ{% if champ.field.widget.input_type == 'checkbox' %} case{% endif %}">
+    {% if champ.field.widget.input_type == 'checkbox' %}{{ champ }} {{ champ.label_tag }}{% else %}{{ champ.label_tag }} {{ champ }}{% endif %}
+    {% if champ.help_text %}<small>{{ champ.help_text }}</small>{% endif %}
+    {% for e in champ.errors %}<small class="erreur-champ">{{ e }}</small>{% endfor %}
+  </div>
+{% endfor %}

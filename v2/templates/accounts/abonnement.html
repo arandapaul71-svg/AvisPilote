@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titre %}Abonnement{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Abonnement</h1>
+  <p>Ta formule, ta consommation du mois et le paiement. Sans engagement : tu changes ou arrêtes quand tu veux.</p>
+</header>
+<p>Formule actuelle : <strong>{{ sub.infos_plan.nom }}</strong> ({{ sub.get_status_display|lower }}{% if sub.status == "essai" %} jusqu'au {{ sub.trial_ends|date:"j F Y" }}{% endif %}).
+  {{ quota.utilises }} avis traités sur {{ quota.quota }} pour la période en cours (jusqu'au {{ quota.period_end|date:"j F" }}).</p>
+
+{% if sub.status == "impaye" %}
+  <p class="bandeau alerte">⚠ Ton dernier paiement a échoué : l'assistant IA est en pause. Mets à jour ta carte pour le réactiver.</p>
+{% endif %}
+
+{% if abonne and membership.role == "owner" %}
+  <section class="carte">
+    <p>Changer de formule, mettre à jour ta carte, télécharger tes factures ou résilier : tout se fait sur la page sécurisée de Stripe.</p>
+    <a class="bouton" href="{% url 'billing:portail_get' %}">Gérer mon abonnement</a>
+  </section>
+{% endif %}
+
+<div class="grille formules">
+  {% for f in formules %}
+  <section class="carte{% if f.cle == sub.plan %} actuelle{% endif %}">
+    <h2>{{ f.nom }}</h2>
+    <p class="chiffre">{{ f.prix }} <span>HT / mois</span></p>
+    <ul>
+      <li>{{ f.quota }} avis traités par mois</li>
+      <li>{{ f.etablissements }} établissement{{ f.etablissements|pluralize }}</li>
+      {% if "recommandations" in f.fonctions %}<li>Alertes détaillées et recommandations suivies</li>{% else %}<li>Alertes simples</li>{% endif %}
+    </ul>
+    {% if f.cle == sub.plan and abonne %}
+      <p class="etiquette">Ta formule</p>
+    {% elif paiement_actif and membership.role == "owner" and not abonne %}
+      <form method="post" action="{% url 'billing:payer' %}">
+        {% csrf_token %}
+        <input type="hidden" name="plan" value="{{ f.cle }}">
+        <button class="bouton{% if f.cle != 'pro' %} secondaire{% endif %}" type="submit">Choisir {{ f.nom }}</button>
+      </form>
+    {% elif f.cle == sub.plan %}
+      <p class="etiquette">Ta formule</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+
+{% if paiement_actif %}
+  <p class="discret">Paiement sécurisé par Stripe : ta carte est saisie sur la page de Stripe, AvisPilote ne voit jamais ses numéros.
+    {% if sub.status == "essai" and not abonne %}Tu ne seras débité qu'à la fin de ton essai gratuit.{% endif %} Sans engagement, résiliable à tout moment.</p>
+{% else %}
+  <p class="discret">Le paiement en ligne n'est pas encore activé sur ce serveur. D'ici là, aucun changement de formule n'est facturé.</p>
+{% endif %}
+
+{% if membership.role == "owner" %}
+<section class="zone-danger">
+  <h2>Supprimer le compte</h2>
+  <p>Efface définitivement ton entreprise, tes avis et tes réglages, et arrête l'abonnement.</p>
+  <a class="bouton danger" href="{% url 'accounts:supprimer_compte' %}">Supprimer mon compte…</a>
+</section>
+{% endif %}
+{% endblock %}

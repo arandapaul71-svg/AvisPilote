@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block titre %}Avis{% endblock %}
+{% block contenu %}
+<div class="entete-page avec-actions">
+  <div><h1>Avis</h1><p>Tous les avis de ta fiche. Relis les réponses proposées par l'assistant, modifie-les si besoin, puis publie.</p></div>
+  {% if fiche and not fiche.is_demo %}
+  <form method="post" action="{% url 'locations:synchroniser' %}">{% csrf_token %}<button class="bouton secondaire" type="submit">Mettre à jour les avis</button></form>
+  {% endif %}
+</div>
+
+{% if not fiche %}
+  <section class="carte">
+    <p>Aucune fiche connectée pour l'instant.</p>
+    <a class="bouton" href="{% url 'accounts:tableau_de_bord' %}">Connecter ma fiche</a>
+  </section>
+{% else %}
+{% if a_valider %}<p class="bandeau info"><a href="?statut=a_valider&periode=tout">{{ a_valider }} réponse{{ a_valider|pluralize }} à valider</a></p>{% endif %}
+
+<form class="filtres" method="get">
+  <label>Période
+    <select name="periode">{% for cle, jours in periodes.items %}<option value="{{ cle }}" {% if filtres.periode == cle %}selected{% endif %}>{% if cle == "tout" %}Tout{% elif cle == "1an" %}1 an{% else %}{{ cle }}{% endif %}</option>{% endfor %}</select>
+  </label>
+  <label>Statut
+    <select name="statut">{% for cle, nom in statuts.items %}<option value="{{ cle }}" {% if filtres.statut == cle %}selected{% endif %}>{{ nom }}</option>{% endfor %}</select>
+  </label>
+  <label>Étoiles
+    <select name="etoiles"><option value="">Toutes</option>{% for n in "54321" %}<option value="{{ n }}" {% if filtres.etoiles == n %}selected{% endif %}>{{ n }} ★</option>{% endfor %}</select>
+  </label>
+  <button class="bouton secondaire" type="submit">Filtrer</button>
+</form>
+
+<p class="discret">{{ page.paginator.count }} avis</p>
+{% for avis in page %}
+<article class="carte avis note-{{ avis.stars }}">
+  <header>
+    <strong>{{ avis.author }}</strong>
+    <span class="etoiles" aria-label="{{ avis.stars }} étoiles sur 5">{% for i in "12345" %}{% if forloop.counter <= avis.stars %}★{% else %}☆{% endif %}{% endfor %}</span>
+    <time class="discret" datetime="{{ avis.created_at|date:'c' }}">{{ avis.created_at|date:"j M Y" }}</time>
+    {% if avis.ai_status == "hors_quota" %}<span class="etiquette grise">Hors quota</span>{% endif %}
+    {% for s in avis.sensibles %}<span class="etiquette rouge">{{ s }}</span>{% endfor %}
+  </header>
+  {% if avis.comment %}<p>{{ avis.comment }}</p>{% else %}<p class="discret">(note sans commentaire)</p>{% endif %}
+
+  {% if avis.analysis.actions and avis.stars <= 3 %}
+  <div class="pistes"><small>Pistes pour toi (non publiées)</small>
+    <ul>{% for a in avis.analysis.actions %}<li>{{ a }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  {% if avis.policy_violation %}<p class="bandeau alerte">Google a signalé un problème de règles : {{ avis.policy_violation }}</p>{% endif %}
+
+  {% with b=avis.brouillon %}
+  {% if avis.google_reply %}
+    <div class="reponse"><small>Ta réponse sur Google</small><p>{{ avis.google_reply|linebreaksbr }}</p></div>
+  {% elif b and b.status == "brouillon" and b.source == "ia" %}
+    <div class="reponse brouillon"><small>Démo : serait publiée automatiquement</small><p>{{ b.text|linebreaksbr }}</p></div>
+  {% elif b and b.status == "brouillon" %}
+    <div class="reponse brouillon"><small>Démo : réponse validée, non publiée</small><p>{{ b.text|linebreaksbr }}</p></div>
+  {% elif peut_repondre %}
+    {% if b and b.status == "a_valider" %}
+      <div class="a-valider">
+        <small>Proposition de l'assistant · à valider</small>
+        {% if b.reasons %}<ul class="raisons">{% for r in b.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    {% endif %}
+    <details {% if b %}open{% endif %}>
+      <summary>{% if b %}Relire et publier{% else %}Répondre{% endif %}</summary>
+      <form method="post" action="{% url 'reviews:repondre' avis.pk %}">
+        {% csrf_token %}
+        <label for="rep-{{ avis.pk }}">Réponse (modifiable)</label>
+        <textarea id="rep-{{ avis.pk }}" name="texte" rows="4" maxlength="4000" required>{% if b %}{{ b.text }}{% endif %}</textarea>
+        <button class="bouton" type="submit">{% if fiche.is_demo %}Valider (démo){% else %}Publier sur Google{% endif %}</button>
+      </form>
+      {% if avis.ai_status == "traite" %}
+      <form method="post" action="{% url 'reviews:regenerer' avis.pk %}">{% csrf_token %}<button class="lien" type="submit">↻ Autre proposition</button></form>
+      {% endif %}
+    </details>
+  {% endif %}
+  {% endwith %}
+</article>
+{% empty %}
+<p class="carte">Aucun avis pour ces filtres.</p>
+{% endfor %}
+
+{% if page.has_other_pages %}
+<nav class="pagination">
+  {% if page.has_previous %}<a href="?periode={{ filtres.periode }}&statut={{ filtres.statut }}&etoiles={{ filtres.etoiles }}&page={{ page.previous_page_number }}">← Précédents</a>{% endif %}
+  <span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a href="?periode={{ filtres.periode }}&statut={{ filtres.statut }}&etoiles={{ filtres.etoiles }}&page={{ page.next_page_number }}">Suivants →</a>{% endif %}
+</nav>
+{% endif %}
+{% endif %}
+{% endblock %}

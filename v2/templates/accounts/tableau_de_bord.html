@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titre %}Tableau de bord{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Bonjour 👋</h1>
+  <p>L'essentiel de tes avis Google en un coup d'œil : ce qui demande ton attention en haut, les chiffres juste en dessous.</p>
+</header>
+
+{% if sub.status == "essai" %}
+  {% if sub.est_utilisable %}
+    <p class="bandeau info">Essai gratuit jusqu'au {{ sub.trial_ends|date:"j F Y" }} · formule {{ plan.nom }}.</p>
+  {% else %}
+    <p class="bandeau alerte">Ton essai est terminé : l'assistant IA est en pause. Tes avis restent consultables.</p>
+  {% endif %}
+{% endif %}
+{% if quota.atteint %}
+  <p class="bandeau alerte">Quota atteint ({{ quota.quota }} avis) : les nouveaux avis sont stockés mais ne sont plus traités par l'IA jusqu'au {{ quota.period_end|date:"j F" }}. <a href="{% url 'accounts:abonnement' %}">Voir les formules</a></p>
+{% elif quota.bientot_atteint %}
+  <p class="bandeau info">Tu as utilisé {{ quota.pourcentage }} % de ton quota ce mois-ci. <a href="{% url 'accounts:abonnement' %}">Voir les formules</a></p>
+{% endif %}
+
+{% if fiche %}
+  {% if not fiche.is_demo %}<p class="discret">Avis mis à jour {% if fiche.last_sync_at %}il y a {{ fiche.last_sync_at|timesince }}{% else %}jamais{% endif %}.</p>{% endif %}
+  {% if alertes or nb_recos %}<h2>À regarder en priorité</h2>{% endif %}
+  {% if connexion_google and connexion_google.status != "ok" %}<p class="bandeau alerte">{{ connexion_google.get_status_display }} : reconnecte ta fiche Google.</p>{% endif %}
+  {% if alertes or nb_recos %}
+  <section class="alertes-tableau">
+    {% for a in alertes %}
+      <div class="alerte-ligne niveau-{{ a.niveau }}">
+        <span class="etiquette niveau-{{ a.niveau }}">{% if a.niveau == "attention" %}⚠{% elif a.niveau == "positif" %}✓{% else %}ℹ{% endif %} {{ a.get_niveau_display }}</span>
+        <p>{{ a.message }}</p>
+        <form method="post" action="{% url 'insights:alerte_lue' a.pk %}">{% csrf_token %}<input type="hidden" name="retour" value="tableau"><button class="lien discret" type="submit">Lue</button></form>
+      </div>
+    {% endfor %}
+    <a href="{% url 'insights:recommandations' %}">Toutes les alertes{% if nb_recos %} et {{ nb_recos }} recommandation{{ nb_recos|pluralize }} en cours{% endif %} →</a>
+  </section>
+  {% endif %}
+  {% include "insights/_statistiques.html" %}
+{% endif %}
+
+<div class="grille">
+  <section class="carte">
+    <h2>Avis traités par l'IA</h2>
+    <p class="chiffre">{{ quota.utilises }} <span>/ {{ quota.quota }}</span></p>
+    <div class="jauge" role="progressbar" aria-valuenow="{{ quota.pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+      <progress max="100" value="{{ quota.pourcentage }}">{{ quota.pourcentage }} %</progress>
+    </div>
+    <p class="discret">Période du {{ quota.period_start|date:"j F" }} au {{ quota.period_end|date:"j F Y" }}</p>
+  </section>
+
+
+  <section class="carte">
+    <h2>Mise en route</h2>
+    <ol class="etapes">
+      <li class="fait">Compte entreprise créé</li>
+      <li class="{% if etapes.fiche_google %}fait{% endif %}">Connecter ta fiche Google Business Profile</li>
+      <li class="{% if etapes.assistant_regle %}fait{% endif %}">{% if fiche and membership.role != "viewer" %}<a href="{% url 'reviews:assistant' %}">Régler ton assistant IA</a>{% else %}Régler ton assistant IA{% endif %}</li>
+    </ol>
+    {% if membership.role == "owner" %}
+    <div class="actions">
+      {% if not etapes.fiche_google or connexion_google.status != "ok" %}
+        <a class="bouton" href="{% url 'locations:google_connecter' %}">Connecter ma fiche Google</a>
+      {% endif %}
+      {% if not etapes.fiche_google and demo_autorisee %}
+        {% if fiche.is_demo %}
+          <form method="post" action="{% url 'locations:supprimer_demo' %}">{% csrf_token %}<button class="bouton secondaire" type="submit">Supprimer la démo</button></form>
+        {% else %}
+          <form method="post" action="{% url 'locations:activer_demo' %}">{% csrf_token %}<button class="bouton secondaire" type="submit">Essayer avec des avis fictifs</button></form>
+        {% endif %}
+      {% endif %}
+      {% if etapes.fiche_google %}
+        <form method="post" action="{% url 'locations:google_deconnecter' %}">{% csrf_token %}<button class="lien discret" type="submit">Déconnecter Google</button></form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

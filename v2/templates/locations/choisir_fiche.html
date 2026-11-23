@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Choisir la fiche{% endblock %}
+{% block contenu %}
+<section class="carte etroite">
+  <h1>Quel établissement gérer ?</h1>
+  <p>Ton compte Google donne accès à {{ fiches|length }} fiche{{ fiches|length|pluralize }}.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% for f in fiches %}
+      <label class="choix"><input type="radio" name="fiche" value="{{ f.name }}" {% if forloop.first %}checked{% endif %}> {{ f.title }}</label>
+    {% endfor %}
+    <button class="bouton" type="submit">Gérer cette fiche</button>
+  </form>
+</section>
+{% endblock %}

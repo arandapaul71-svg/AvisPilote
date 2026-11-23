@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titre %}Assistant IA{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Assistant IA</h1>
+  <p>Règle comment l'assistant répond à tes clients : quand il publie seul, sur quel ton, et ce qu'il doit savoir de ton établissement.</p>
+</header>
+<p class="discret">Rédaction : {{ moteur }}. L'assistant ne promet jamais de remboursement, ne reconnaît pas de faute non confirmée et n'invente rien : une réponse qui ne passe pas le contrôle qualité attend toujours ta validation.</p>
+
+<form method="post" class="reglages" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="erreur">{{ form.non_field_errors }}</div>{% endif %}
+
+  <section class="carte">
+    <h2>Quand publier automatiquement ?</h2>
+    <div class="grille-modes">
+      {% for champ in champs_modes %}<div class="champ">{{ champ.label_tag }} {{ champ }}</div>{% endfor %}
+    </div>
+    <div class="champ case">{{ form.sensitive_requires_validation }} {{ form.sensitive_requires_validation.label_tag }}</div>
+    <small>{{ form.sensitive_requires_validation.help_text }}</small>
+  </section>
+
+  <section class="carte">
+    <h2>Style des réponses</h2>
+    <div class="grille-modes">
+      <div class="champ">{{ form.tone.label_tag }} {{ form.tone }}</div>
+      <div class="champ">{{ form.length.label_tag }} {{ form.length }}</div>
+    </div>
+    <div class="champ case">{{ form.tutoiement }} {{ form.tutoiement.label_tag }}</div>
+    <div class="champ case">{{ form.emojis }} {{ form.emojis.label_tag }}</div>
+    <div class="champ">{{ form.signature.label_tag }} {{ form.signature }}<small>Vide : « L'équipe {{ organisation.name }} »</small></div>
+  </section>
+
+  <section class="carte">
+    <div class="entete">
+      <h2>Ce que l'assistant doit savoir</h2>
+      <a class="bouton secondaire" href="?exemples=1">Pré-remplir avec des exemples ({{ fiche.get_sector_display|lower }})</a>
+    </div>
+    {% for champ, exemple in champs_textes %}
+      <div class="champ">
+        {{ champ.label_tag }} {{ champ }}
+        {% if champ.help_text %}<small>{{ champ.help_text }}</small>{% endif %}
+        {% for e in champ.errors %}<small class="erreur-champ">{{ e }}</small>{% endfor %}
+        <details class="exemple"><summary>Voir un exemple</summary><pre>{{ exemple }}</pre></details>
+      </div>
+    {% endfor %}
+    {% if moteur != "Claude" %}<small>Les consignes libres (informations, consignes pour les avis négatifs) ne sont utilisées qu'avec Claude ; les expressions interdites sont toujours contrôlées.</small>{% endif %}
+  </section>
+
+  <button class="bouton" type="submit">Enregistrer</button>
+</form>
+{% endblock %}

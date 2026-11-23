@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titre %}Connexion Google{% endblock %}
+{% block contenu %}
+<section class="carte etroite">
+  <h1>Connexion Google bientôt disponible</h1>
+  <p>Google n'ouvre son API Business Profile qu'aux applications qu'il a validées. La demande d'accès d'AvisPilote est en cours : dès qu'elle est acceptée, tu pourras connecter ta fiche ici, via l'écran officiel de Google.</p>
+  <p>Nous ne te demanderons jamais ton mot de passe Google.</p>
+  {% if membership.role == "owner" and not en_demo %}
+  <p>En attendant, tu peux découvrir l'appli avec des avis fictifs :</p>
+  <form method="post" action="{% url 'locations:activer_demo' %}">{% csrf_token %}<button class="bouton secondaire" type="submit">Essayer avec des avis fictifs</button></form>
+  {% endif %}
+  <p><a href="{% url 'accounts:tableau_de_bord' %}">Retour au tableau de bord</a></p>
+</section>
+{% endblock %}

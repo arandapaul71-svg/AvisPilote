@@ -1,0 +1,111 @@
+{% load static l10n insights_tags %}
+{% include "insights/_filtre_periode.html" %}
+
+<div class="tuiles">
+  <section class="tuile">
+    <h2>Note Google</h2>
+    <p class="valeur">{% if ind.note_google %}{{ ind.note_google|floatformat:1 }} ★{% else %}–{% endif %}</p>
+    <p class="detail">{% if ind.nb_google %}{{ ind.nb_google }} avis au total{% else %}pas encore de données{% endif %}{% if fiche.is_demo %} · démo{% endif %}</p>
+  </section>
+  <section class="tuile">
+    <h2>Avis reçus</h2>
+    <p class="valeur">{{ ind.total }}</p>
+    <p class="detail">{% if ind.total_delta > 0 %}▲ {{ ind.total_delta }}{% elif ind.total_delta < 0 %}▼ {{ ind.total_delta_abs }}{% else %}={% endif %} vs période précédente</p>
+  </section>
+  <section class="tuile">
+    <h2>Note sur la période</h2>
+    <p class="valeur">{% if ind.note_periode %}{{ ind.note_periode|floatformat:2 }} ★{% else %}–{% endif %}</p>
+    <p class="detail">{% if ind.note_delta is None %}pas de comparaison{% elif ind.note_delta > 0 %}<span class="hausse">▲ {{ ind.note_delta|floatformat:2 }}</span> vs période précédente{% elif ind.note_delta < 0 %}<span class="baisse">▼ {{ ind.note_delta_abs|floatformat:2 }}</span> vs période précédente{% else %}= stable{% endif %}</p>
+  </section>
+  <section class="tuile">
+    <h2>Taux de réponse</h2>
+    <p class="valeur">{% if ind.taux_reponse is not None %}{{ ind.taux_reponse }} %{% else %}–{% endif %}</p>
+    <p class="detail">{% if ind.a_valider %}<a href="{% url 'reviews:liste' %}?statut=a_valider&periode=tout">{{ ind.a_valider }} à valider</a>{% else %}aucune réponse en attente{% endif %}</p>
+  </section>
+  <section class="tuile">
+    <h2>Réponses de l'assistant</h2>
+    <p class="valeur">{{ ind.reponses_ia }}</p>
+    <p class="detail">dont {{ ind.publiees_auto }} {% if fiche.is_demo %}automatiques (démo){% else %}publiées automatiquement{% endif %}</p>
+  </section>
+  <section class="tuile">
+    <h2>Temps de réponse moyen</h2>
+    <p class="valeur">{% if ind.delai_moyen %}{{ ind.delai_moyen|duree }}{% else %}–{% endif %}</p>
+    <p class="detail">{% if ind.delai_moyen %}entre l'avis et ta réponse{% else %}pas encore de réponse datée par Google{% endif %}</p>
+  </section>
+</div>
+
+<div class="grille-graphes">
+  <section class="carte graphe large">
+    <h2>Avis reçus</h2>
+    <p class="discret">{{ ind.positifs }} positifs (4-5 ★) · {{ ind.neutres }} neutres (3 ★) · {{ ind.negatifs }} négatifs (1-2 ★)</p>
+    <ul class="legende" aria-hidden="true">
+      <li><span class="cle positifs"></span>Positifs</li><li><span class="cle neutres"></span>Neutres</li><li><span class="cle negatifs"></span>Négatifs</li>
+    </ul>
+    {% with g=g_colonnes %}
+    {% if g.vide %}<p class="discret">Aucun avis sur cette période.</p>{% else %}
+    {% localize off %}<svg class="svg-graphe" viewBox="0 0 {{ g.largeur }} {{ g.hauteur }}" role="img" aria-label="Nombre d'avis par période, par sentiment">
+      {% for t in g.graduations %}<line class="grille" x1="{{ g.x0 }}" x2="{{ g.x1 }}" y1="{{ t.y }}" y2="{{ t.y }}"/><text class="axe" x="{{ g.x_graduations }}" y="{{ t.y }}" dy="4" text-anchor="end">{{ t.valeur }}</text>{% endfor %}
+      {% for c in g.colonnes %}
+        <g class="colonne">{% for s in c.segments %}<path class="{{ s.classe }}" d="{{ s.d }}"/>{% endfor %}</g>
+        <rect class="cible" x="{{ c.cible_x }}" y="{{ g.haut_zone }}" width="{{ c.cible_l }}" height="{{ g.hauteur_zone }}" tabindex="0" data-info="{{ c.info }}"><title>{{ c.info }}</title></rect>
+      {% endfor %}
+      <line class="ligne-base" x1="{{ g.x0 }}" x2="{{ g.x1 }}" y1="{{ g.base }}" y2="{{ g.base }}"/>
+      {% for c in g.axe_x %}<text class="axe" x="{{ c.cx }}" y="{{ g.y_axe_x }}" text-anchor="middle">{{ c.libelle }}</text>{% endfor %}
+    </svg>{% endlocalize %}
+    {% endif %}
+    {% endwith %}
+  </section>
+
+  <section class="carte graphe large">
+    <h2>Évolution de la note moyenne</h2>
+    <p class="discret">Moyenne de tous les avis récupérés jusqu'à chaque date (estimation : Google peut filtrer certains avis).</p>
+    {% with g=g_note %}
+    {% if g.vide %}<p class="discret">Pas encore assez d'avis.</p>{% else %}
+    {% localize off %}<svg class="svg-graphe" viewBox="0 0 {{ g.largeur }} {{ g.hauteur }}" role="img" aria-label="Évolution de la note moyenne, actuellement {{ g.valeur_fin }} sur 5">
+      {% for t in g.graduations %}<line class="grille" x1="{{ g.x0 }}" x2="{{ g.x1 }}" y1="{{ t.y }}" y2="{{ t.y }}"/><text class="axe" x="{{ g.x_graduations }}" y="{{ t.y }}" dy="4" text-anchor="end">{{ t.valeur }}</text>{% endfor %}
+      <path class="courbe" d="{{ g.chemin }}"/>
+      <circle class="point-fin" cx="{{ g.fin.cx }}" cy="{{ g.fin.cy }}" r="4"/>
+      <text class="valeur-fin" x="{{ g.x_valeur_fin }}" y="{{ g.fin.cy }}" dy="4">{{ g.valeur_fin }}</text>
+      {% for c in g.cibles %}
+        <g class="cible-courbe"><line class="repere" x1="{{ c.cx }}" x2="{{ c.cx }}" y1="{{ g.haut_zone }}" y2="{{ g.base }}"/>
+        <rect class="cible" x="{{ c.x }}" y="{{ g.haut_zone }}" width="{{ c.l }}" height="{{ g.hauteur_zone }}" tabindex="0" data-info="{{ c.info }}"><title>{{ c.info }}</title></rect></g>
+      {% endfor %}
+      {% for c in g.axe_x %}<text class="axe" x="{{ c.cx }}" y="{{ g.y_axe_x }}" text-anchor="middle">{{ c.libelle }}</text>{% endfor %}
+    </svg>{% endlocalize %}
+    {% endif %}
+    {% endwith %}
+  </section>
+
+  <section class="carte graphe">
+    <h2>Répartition des notes</h2>
+    {% with g=g_etoiles %}
+    {% localize off %}<svg class="svg-graphe" viewBox="0 0 {{ g.largeur }} {{ g.hauteur }}" role="img" aria-label="Nombre d'avis par nombre d'étoiles">
+      {% for l in g.lignes %}
+        <text class="axe" x="{{ g.x_etiquettes }}" y="{{ l.texte_y }}" text-anchor="end">{{ l.etoiles }} ★</text>
+        {% if l.d %}<path class="barre" d="{{ l.d }}" tabindex="0" data-info="{{ l.etoiles }} étoiles : {{ l.nombre }} avis ({{ l.part }} %)"><title>{{ l.etoiles }} étoiles : {{ l.nombre }} avis</title></path>{% endif %}
+        <text class="valeur" x="{{ l.valeur_x }}" y="{{ l.texte_y }}">{{ l.nombre }}</text>
+      {% endfor %}
+    </svg>{% endlocalize %}
+    {% endwith %}
+  </section>
+
+  <section class="carte">
+    <h2>Points forts et points faibles</h2>
+    {% if ff.analyses %}
+      <small>Points forts</small>
+      <ul class="resume-themes">{% for t in ff.qualite|slice:":3" %}<li><span>{{ t.nom }}</span><span class="discret">{{ t.nombre }} avis</span></li>{% empty %}<li class="discret">Aucun relevé</li>{% endfor %}</ul>
+      <small>Points faibles</small>
+      <ul class="resume-themes">{% for t in ff.defaut|slice:":3" %}<li><span>{{ t.nom }}</span><span class="discret">{{ t.nombre }} avis</span></li>{% empty %}<li class="discret">Aucun relevé</li>{% endfor %}</ul>
+      <a href="{% url 'insights:analyses' %}?periode={{ periode }}">Voir le détail, les exemples et les solutions →</a>
+    {% else %}<p class="discret">Aucun avis analysé sur cette période.</p>{% endif %}
+  </section>
+</div>
+
+<details class="donnees">
+  <summary>Voir les données en tableau</summary>
+  <table>
+    <thead><tr><th scope="col">Période</th><th scope="col">Avis</th><th scope="col">Positifs</th><th scope="col">Neutres</th><th scope="col">Négatifs</th><th scope="col">Note cumulée</th></tr></thead>
+    <tbody>{% for s in serie %}<tr><th scope="row">{{ s.libelle }}</th><td>{{ s.total }}</td><td>{{ s.positifs }}</td><td>{{ s.neutres }}</td><td>{{ s.negatifs }}</td><td>{{ s.note_cumulee|default:"–" }}</td></tr>{% endfor %}</tbody>
+  </table>
+</details>
+<script src="{% static 'js/graphiques.js' %}" defer></script>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titre %}Analyses{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Ce que disent tes clients</h1>
+  <p>Les qualités et les défauts qui reviennent dans les avis, avec des exemples et des idées pour t'améliorer.</p>
+</header>
+{% include "insights/_filtre_periode.html" %}
+<p class="discret">Période : {{ nom_periode }} · basé sur {{ ff.analyses }} avis analysés par l'assistant.
+  {% if ff.hors_analyse %}{{ ff.hors_analyse }} avis de la période ne sont pas analysés (hors quota, anciens ou en attente).{% endif %}</p>
+
+{% if not ff.analyses %}
+  <p class="carte">Aucun avis analysé sur cette période.</p>
+{% else %}
+<div class="grille-graphes">
+  <section class="carte">
+    <h2>Points forts</h2>
+    {% for t in ff.qualite %}
+      <article class="theme">
+        <header><strong>{{ t.nom }}</strong> <span class="discret">{{ t.nombre }} avis · {{ t.part }} %</span>
+          {% if t.evolution > 0 %}<span class="hausse">▲ {{ t.evolution }}</span>{% elif t.evolution < 0 %}<span class="discret">▼ {{ t.evolution|stringformat:"d"|cut:"-" }}</span>{% endif %}</header>
+        <progress class="jauge-theme positif" max="100" value="{{ t.part }}">{{ t.part }} %</progress>
+        {% for e in t.exemples %}<blockquote>« {{ e }} »</blockquote>{% endfor %}
+      </article>
+    {% empty %}<p class="discret">Aucun point fort relevé.</p>{% endfor %}
+  </section>
+
+  <section class="carte">
+    <h2>Points faibles</h2>
+    {% for t in ff.defaut %}
+      <article class="theme">
+        <header><strong>{{ t.nom }}</strong> <span class="discret">{{ t.nombre }} avis · {{ t.part }} %</span>
+          {% if t.evolution > 0 %}<span class="baisse">▲ {{ t.evolution }} vs période précédente</span>{% elif t.evolution < 0 %}<span class="hausse">▼ {{ t.evolution|stringformat:"d"|cut:"-" }}</span>{% endif %}</header>
+        <progress class="jauge-theme negatif" max="100" value="{{ t.part }}">{{ t.part }} %</progress>
+        {% for e in t.exemples %}<blockquote>« {{ e }} »</blockquote>{% endfor %}
+        {% if t.solutions %}<details><summary>Que faire ?</summary><ul>{% for s in t.solutions %}<li>{{ s }}</li>{% endfor %}</ul></details>{% endif %}
+      </article>
+    {% empty %}<p class="discret">Aucun point faible relevé. Bravo !</p>{% endfor %}
+  </section>
+</div>
+{% endif %}
+{% endblock %}

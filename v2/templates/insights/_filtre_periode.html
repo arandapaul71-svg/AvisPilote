@@ -1,0 +1,5 @@
+<nav class="filtre-periode" aria-label="Période">
+  {% for cle, p in periodes.items %}
+    <a href="?periode={{ cle }}" {% if cle == periode %}aria-current="true"{% endif %}>{{ p.nom }}</a>
+  {% endfor %}
+</nav>

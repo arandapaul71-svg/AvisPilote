@@ -1,0 +1,90 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}AvisPilote{% endblock %} · AvisPilote</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  <link rel="icon" href="{% static 'icone.svg' %}" type="image/svg+xml">
+  <meta name="theme-color" content="#f7f7f5">
+</head>
+<body>
+{% if user.is_authenticated and membership %}
+{% with nom=request.resolver_match.url_name %}
+<div class="app">
+  <aside class="sidebar" aria-label="Navigation">
+    <a class="logo" href="{% url 'accounts:tableau_de_bord' %}">{% include "_logo.html" %} AvisPilote</a>
+
+    <div class="etablissement">
+      <strong>{{ fiche_active.title|default:organisation.name }}</strong>
+      <span>{% if en_demo %}Démonstration{% elif fiche_active %}Fiche Google connectée{% else %}Aucune fiche connectée{% endif %} · {{ organisation.subscription.infos_plan.nom }}</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-groupe">
+        <span class="nav-titre">Au quotidien</span>
+        <a class="nav-lien" href="{% url 'accounts:tableau_de_bord' %}" {% if nom == 'tableau_de_bord' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Tableau de bord</a>
+        <a class="nav-lien" href="{% url 'reviews:liste' %}" {% if nom == 'liste' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+          Avis{% if nb_a_valider %}<span class="pastille" title="Réponses à valider">{{ nb_a_valider }}</span>{% endif %}</a>
+        <a class="nav-lien" href="{% url 'insights:recommandations' %}" {% if nom == 'recommandations' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+          Alertes{% if nb_alertes %}<span class="pastille rouge" title="Alertes non lues">{{ nb_alertes }}</span>{% endif %}</a>
+      </div>
+      <div class="nav-groupe">
+        <span class="nav-titre">Comprendre</span>
+        <a class="nav-lien" href="{% url 'insights:analyses' %}" {% if nom == 'analyses' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
+          Analyses</a>
+        <a class="nav-lien" href="{% url 'insights:rapports' %}" {% if nom == 'rapports' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          Rapports</a>
+      </div>
+      <div class="nav-groupe">
+        <span class="nav-titre">Configurer</span>
+        <a class="nav-lien" href="{% url 'reviews:assistant' %}" {% if nom == 'assistant' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+          Assistant IA</a>
+        <a class="nav-lien" href="{% url 'insights:outils' %}" {% if nom == 'outils' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+          QR code et simulateur</a>
+        <a class="nav-lien" href="{% url 'accounts:abonnement' %}" {% if nom == 'abonnement' %}aria-current="page"{% endif %}>
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+          Abonnement</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-bas">
+      <span class="utilisateur">{{ user.email }}</span>
+      <form method="post" action="{% url 'accounts:deconnexion' %}">
+        {% csrf_token %}
+        <button class="lien" type="submit"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Se déconnecter</span></button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="contenu-app">
+    {% if en_demo %}<p class="bandeau-demo"><strong>Mode démonstration</strong> · avis fictifs, aucune connexion Google, rien n'est publié.</p>{% endif %}
+    <main class="page">
+{% endwith %}
+{% else %}
+{% include "_entete_public.html" %}
+<main class="page-publique">
+{% endif %}
+  {% for m in messages %}<p class="message {{ m.tags }}">{{ m }}</p>{% endfor %}
+  {% block contenu %}{% endblock %}
+</main>
+{% if user.is_authenticated and membership %}
+    <footer class="pied">
+      <a href="{% url 'accounts:cgu' %}">CGU / CGV</a> · <a href="{% url 'accounts:confidentialite' %}">Confidentialité</a> · <a href="{% url 'accounts:mentions' %}">Mentions légales</a>
+    </footer>
+  </div>
+</div>
+{% else %}
+{% include "_pied_public.html" %}
+{% endif %}
+</body>
+</html>

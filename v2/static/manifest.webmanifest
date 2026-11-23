@@ -1,0 +1,14 @@
+{
+  "name": "AvisPilote",
+  "short_name": "AvisPilote",
+  "description": "Vos avis Google, compris et répondus.",
+  "start_url": "/tableau-de-bord/",
+  "display": "standalone",
+  "background_color": "#1b2540",
+  "theme_color": "#1b2540",
+  "lang": "fr",
+  "icons": [
+    {"src": "/static/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/static/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

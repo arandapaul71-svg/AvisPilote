@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titre %}Supprimer le compte{% endblock %}
+{% block contenu %}
+<section class="carte etroite">
+  <h1>Supprimer le compte</h1>
+  <p>Cette action est <strong>définitive</strong> : l'entreprise « {{ organisation.name }} », ses avis, ses analyses et ses réglages seront effacés.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "accounts/_champs.html" %}
+    <button class="bouton danger" type="submit">Supprimer définitivement</button>
+    <a href="{% url 'accounts:abonnement' %}">Annuler</a>
+  </form>
+</section>
+{% endblock %}

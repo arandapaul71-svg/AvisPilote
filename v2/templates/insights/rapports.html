@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block titre %}Rapports{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Rapports</h1>
+  <p>Le bilan de chaque mois ou de chaque semaine, à lire ici, télécharger en PDF ou recevoir par e-mail.</p>
+</header>
+
+{% if not autorise %}
+  <p class="carte">Les rapports mensuels et hebdomadaires (PDF et envoi par e-mail) sont inclus dans la formule <a href="{% url 'accounts:abonnement' %}">Pro</a>.</p>
+{% else %}
+<nav class="filtre-periode" aria-label="Type de rapport">
+  {% for cle, nom in types.items %}<a href="?type={{ cle }}" {% if cle == type %}aria-current="true"{% endif %}>{{ nom }}</a>{% endfor %}
+</nav>
+<form class="filtres" method="get">
+  <input type="hidden" name="type" value="{{ type }}">
+  <label>Période
+    <select name="decalage">{% for i, titre in periodes %}<option value="{{ i }}" {% if i == decalage %}selected{% endif %}>{{ titre }}</option>{% endfor %}</select>
+  </label>
+  <button class="bouton secondaire" type="submit">Afficher</button>
+</form>
+
+<section class="carte rapport">
+  <header class="entete">
+    <div><h2>{{ r.type_nom }} · {{ r.titre }}</h2><p class="discret">{{ fiche.title }}</p></div>
+    <div class="actions">
+      <a class="bouton" href="{% url 'insights:rapport_pdf' %}?type={{ type }}&decalage={{ decalage }}">Télécharger le PDF</a>
+      {% if peut_regler %}
+      <form method="post" action="{% url 'insights:rapport_envoyer' %}?type={{ type }}&decalage={{ decalage }}">{% csrf_token %}<button class="bouton secondaire" type="submit">M'envoyer par e-mail</button></form>
+      {% endif %}
+    </div>
+  </header>
+  <p class="bilan">{{ bilan }}</p>
+
+  <div class="tuiles">
+    <div class="tuile"><h3>Avis reçus</h3><p class="valeur">{{ r.ind.total }}</p><p class="detail">{% if r.ind.total_delta > 0 %}+{% endif %}{{ r.ind.total_delta }} vs précédente</p></div>
+    <div class="tuile"><h3>Note de la période</h3><p class="valeur">{% if r.ind.note_periode %}{{ r.ind.note_periode|floatformat:2 }} ★{% else %}–{% endif %}</p><p class="detail">{% if r.ind.note_delta is not None %}{% if r.ind.note_delta > 0 %}+{% endif %}{{ r.ind.note_delta|floatformat:2 }} vs précédente{% else %}pas de comparaison{% endif %}</p></div>
+    <div class="tuile"><h3>Taux de réponse</h3><p class="valeur">{% if r.ind.taux_reponse is not None %}{{ r.ind.taux_reponse }} %{% else %}–{% endif %}</p><p class="detail">{{ r.ind.reponses_ia }} réponses de l'assistant</p></div>
+  </div>
+
+  <div class="grille-graphes">
+    <div>
+      <h3>Points forts</h3>
+      <ul class="resume-themes">{% for t in r.ff.qualite|slice:":5" %}<li><span>{{ t.nom }}</span><span class="discret">{{ t.nombre }} avis{% if t.evolution %} ({% if t.evolution > 0 %}+{% endif %}{{ t.evolution }}){% endif %}</span></li>{% empty %}<li class="discret">Rien de notable</li>{% endfor %}</ul>
+    </div>
+    <div>
+      <h3>Problèmes relevés</h3>
+      <ul class="resume-themes">{% for t in r.ff.defaut|slice:":5" %}<li><span>{{ t.nom }}</span><span class="discret">{{ t.nombre }} avis{% if t.evolution %} ({% if t.evolution > 0 %}+{% endif %}{{ t.evolution }}){% endif %}</span></li>{% empty %}<li class="discret">Rien de notable</li>{% endfor %}</ul>
+    </div>
+  </div>
+
+  <h3>Événements inhabituels</h3>
+  {% for a in r.alertes %}<p class="alerte-ligne niveau-{{ a.niveau }}">{{ a.message }}</p>{% empty %}<p class="discret">Aucune anomalie détectée.</p>{% endfor %}
+
+  <h3>Recommandations en cours</h3>
+  <ul>{% for reco in r.recos %}<li><strong>{{ reco.titre }}</strong> · {{ reco.get_importance_display|lower }} · {{ reco.get_status_display|lower }}</li>{% empty %}<li class="discret">Aucune.</li>{% endfor %}</ul>
+  {% for reco in r.resolues %}<p class="hausse">✓ Réglé pendant la période : {{ reco.titre }}</p>{% endfor %}
+</section>
+{% endif %}
+
+{% if peut_regler %}
+<section class="carte etroite-gauche">
+  <h2>Envoi automatique</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "accounts/_champs.html" with form=form %}
+    <button class="bouton secondaire" type="submit">Enregistrer</button>
+  </form>
+  <p class="discret">Le rapport part au gérant au début de chaque mois (ou chaque lundi), avec le PDF en pièce jointe.{% if fiche.is_demo %} Pas d'envoi automatique pour la démo.{% endif %}</p>
+</section>
+{% endif %}
+{% endblock %}

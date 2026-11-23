@@ -1,0 +1,21 @@
+{% autoescape off %}{{ r.type_nom }} · {{ r.titre }}
+{{ r.fiche.title }}
+
+{{ bilan }}
+
+Points forts :
+{% for t in r.ff.qualite|slice:":3" %}- {{ t.nom }} ({{ t.nombre }} avis)
+{% empty %}- rien de notable
+{% endfor %}
+Problèmes relevés :
+{% for t in r.ff.defaut|slice:":3" %}- {{ t.nom }} ({{ t.nombre }} avis)
+{% empty %}- rien de notable
+{% endfor %}
+Événements inhabituels :
+{% for a in r.alertes %}- {{ a.message }}
+{% empty %}- aucun
+{% endfor %}
+Le rapport complet est en pièce jointe (PDF).
+Tableau de bord : {{ app_url }}/tableau-de-bord/
+Ne plus recevoir ces e-mails : {{ app_url }}/rapports/
+{% endautoescape %}

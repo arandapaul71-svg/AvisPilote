@@ -1,0 +1,23 @@
+{% extends "base_public.html" %}
+{% block titre %}Connexion · AvisPilote{% endblock %}
+{% block contenu %}
+<div class="auth-page">
+  <section class="carte auth-carte">
+    <h1>Bon retour parmi nous</h1>
+    <p class="sous-titre">Connecte-toi pour retrouver tes avis et ton tableau de bord.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "accounts/_champs.html" %}
+      <button class="bouton" type="submit">Se connecter</button>
+    </form>
+    <p class="bas">Pas encore de compte ? <a href="{% url 'accounts:inscription' %}">Essai gratuit 14 jours</a></p>
+    {% if demo_autorisee %}
+    <div class="demo-express">
+      <p>Envie de voir avant de t'inscrire ?</p>
+      <form method="post" action="{% url 'accounts:demo_express' %}">{% csrf_token %}<button class="bouton secondaire" type="submit">Découvrir avec la démo</button></form>
+      <small>Une boulangerie fictive avec 3 mois d'avis. Aucune donnée réelle, rien n'est envoyé à Google.</small>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

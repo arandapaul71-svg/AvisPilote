@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block titre %}Alertes et recommandations{% endblock %}
+{% block contenu %}
+<header class="entete-page">
+  <h1>Alertes et recommandations</h1>
+  <p>AvisPilote compare tes avis à ton habitude pour repérer un problème avant qu'il n'abîme ta note. Une alerte n'apparaît que si plusieurs avis vont dans le même sens.</p>
+</header>
+
+<section>
+  <h2>Alertes des 60 derniers jours</h2>
+  {% for a in alertes %}
+    <article class="carte alerte-carte niveau-{{ a.niveau }}{% if a.read_at %} lue{% endif %}">
+      <header>
+        <span class="etiquette niveau-{{ a.niveau }}">{% if a.niveau == "attention" %}⚠ {% elif a.niveau == "positif" %}✓ {% else %}ℹ {% endif %}{{ a.get_niveau_display }}</span>
+        <time class="discret" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|date:"j M Y" }}</time>
+      </header>
+      <p>{{ a.message }}</p>
+      {% if a.preuves %}
+        <details><summary>Voir les avis concernés</summary>
+          {% for p in a.preuves %}<blockquote>{{ p.stars }}★ · {{ p.author }} : « {{ p.comment|default:"(sans texte)"|truncatechars:160 }} »</blockquote>{% endfor %}
+        </details>
+      {% endif %}
+      {% if not a.read_at %}
+        <form method="post" action="{% url 'insights:alerte_lue' a.pk %}">{% csrf_token %}<button class="lien" type="submit">Marquer comme lue</button></form>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="carte">Aucune alerte : rien d'inhabituel dans tes avis ces derniers temps.</p>
+  {% endfor %}
+  {% if alertes and not detail %}<p class="discret">Le détail des avis concernés est inclus dans la formule <a href="{% url 'accounts:abonnement' %}">Pro</a>.</p>{% endif %}
+</section>
+
+<section>
+  <h2>Recommandations</h2>
+  {% if not avec_recos %}
+    <p class="carte">Les recommandations suivies (problème, preuves, actions et suivi de l'effet de tes actions) sont incluses dans la formule <a href="{% url 'accounts:abonnement' %}">Pro</a>.</p>
+  {% else %}
+  {% for r in recos %}
+    <article class="carte reco statut-{{ r.status }}">
+      <header>
+        <strong>{{ r.titre }}</strong>
+        <span class="etiquette importance-{{ r.importance }}">Importance {{ r.get_importance_display|lower }}</span>
+        <span class="etiquette grise">{{ r.get_status_display }}</span>
+      </header>
+      <p>{{ r.problem }}</p>
+      {% if r.preuves %}
+        <small>Ce que disent les clients</small>
+        {% for p in r.preuves %}<blockquote>{{ p.stars }}★ · « {{ p.comment|default:"(sans texte)"|truncatechars:160 }} »</blockquote>{% endfor %}
+      {% endif %}
+      {% if r.actions %}
+        <small>Actions proposées</small>
+        <ul>{% for act in r.actions %}<li>{{ act }}</li>{% endfor %}</ul>
+      {% endif %}
+      {% if r.suivi %}
+        <p class="suivi tendance-{{ r.suivi.tendance }}">
+          Suivi depuis le {{ r.suivi.date }} : {{ r.suivi.depuis }} avis mentionne{{ r.suivi.depuis|pluralize:"nt" }} encore ce problème,
+          contre {{ r.suivi.avant }} sur la même durée avant.
+          {% if r.suivi.tendance == "amelioration" %}✓ Tes actions semblent porter leurs fruits.{% elif r.suivi.tendance == "degradation" %}⚠ Le problème s'aggrave.{% else %}Pas encore de changement visible.{% endif %}
+        </p>
+      {% endif %}
+      {% if peut_agir %}
+      <form class="statut-form" method="post" action="{% url 'insights:changer_statut' r.pk %}">
+        {% csrf_token %}
+        {% for valeur, nom in statuts %}{% if valeur != r.status %}
+          <button class="bouton secondaire" type="submit" name="statut" value="{{ valeur }}">{% if valeur == "en_cours" %}J'agis dessus{% elif valeur == "resolue" %}C'est réglé{% else %}Rouvrir{% endif %}</button>
+        {% endif %}{% endfor %}
+      </form>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="carte">Pas de recommandation pour l'instant : aucun problème ne revient assez souvent dans tes avis.</p>
+  {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

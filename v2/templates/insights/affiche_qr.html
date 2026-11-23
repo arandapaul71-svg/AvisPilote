@@ -1,0 +1,20 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Affiche avis Google · {{ fiche.title }}</title>
+  <link rel="stylesheet" href="{% static 'css/affiche.css' %}">
+</head>
+<body>
+  <p class="consigne">Imprime cette page (Ctrl + P). Format conseillé : A5 ou A6, à poser sur le comptoir ou les tables.</p>
+  <main class="affiche">
+    <p class="nom">{{ fiche.title }}</p>
+    <h1>Votre avis nous intéresse</h1>
+    <p class="texte">Scannez ce code pour laisser un avis sur Google.<br>Merci, cela nous aide à nous améliorer !</p>
+    {# SVG produit par segno à partir d'un lien Google validé. #}
+    <div class="qr">{{ qr|safe }}</div>
+    {# Pas de « 5 étoiles » décoratives : la demande d'avis doit rester neutre (règles Google). #}
+  </main>
+</body>
+</html>

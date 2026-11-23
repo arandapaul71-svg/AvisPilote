@@ -1,0 +1,19 @@
+<header class="public-entete">
+  <div class="interieur">
+    <a class="logo" href="{% url 'accounts:accueil' %}">{% include "_logo.html" %} AvisPilote</a>
+    <nav class="public-nav" aria-label="Sections">
+      <a href="{% url 'accounts:accueil' %}#fonctions">Fonctionnalités</a>
+      <a href="{% url 'accounts:accueil' %}#prevention">Anticiper</a>
+      <a href="{% url 'accounts:accueil' %}#tarifs">Tarifs</a>
+      <a href="{% url 'accounts:accueil' %}#questions">Questions</a>
+    </nav>
+    <div class="public-actions">
+      {% if user.is_authenticated %}
+        <a class="bouton" href="{% url 'accounts:tableau_de_bord' %}">Mon tableau de bord</a>
+      {% else %}
+        <a class="lien-connexion" href="{% url 'accounts:connexion' %}">Se connecter</a>
+        <a class="bouton" href="{% url 'accounts:inscription' %}">Essai gratuit</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
